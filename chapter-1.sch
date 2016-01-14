@@ -96,7 +96,96 @@
 
 ;; 1.13 not code
 
-;; 1.14 page 104
+;; 1.14 not code
+
+;; 1.15
+
+(define (cube x) (* x x x))
+(define (p x) (- (* 3 x) (* 4 (cube x))))
+(define (sine angle)
+  (if (not (> (abs angle) 0.1))
+      angle
+      (p (sine (/ angle 3.0)))))
+
+                                        ; a. log_3(12.15/0.1)
+
+                                        ; b. growth in space ~ O(log(a))
+
+;; 1.16
+
+(define (expt b n)
+  (expt-iter 1 b n))
+
+(define (expt-iter a b n)
+  (cond
+   ((zero? n) a)
+   ((even? n) (expt-iter a       (* b b) (/ n       2)))
+   (else      (expt-iter (* a b) (* b b) (/ (- n 1) 2)))))
+
+;; 1.17
+
+(define (double i)
+  (* i 2))
+
+(define (halve i)
+  (/ i 2))
+
+(define (fast-mult a b)
+  (cond
+   ((zero? b) 0)
+   ((= b 1)   a)
+   ((even? b) (fast-mult (double a) (halve b)))
+   (else      (+ a (fast-mult (double a) (halve (- b 1)))))))
+
+;; 1.18
+
+(define (mult-iter a b c)
+  (cond
+   ((zero? c) 0)
+   ((= c 1)   (+ a b))
+   ((even? c) (mult-iter a       (double b) (halve c)))
+   (else      (mult-iter (+ a b) (double b) (halve (- c 1))))))
+
+(define (mult b c)
+  (mult-iter 0 b c))
+
+;; 1.19
+
+                                        ; T_pq
+                                        ; a := bq + aq + ap
+                                        ; b := bp + aq
+
+                                        ; T_pq*T_pq
+                                        ; a := (bp + aq)q + (bq + aq + ap)(q + p)
+                                        ; b := (bp + aq)p + (bq + aq + ap)q
+
+                                        ; a := b(2pq + qq) + a(2pq + qq) + a(pp + qq)
+                                        ; b := b(pp + qq)  + a(2pq + qq)
+
+                                        ; p' =  pp + qq
+                                        ; q' = 2pq + qq
 
 
+(define (fib n)
+  (fib-iter 1 0 0 1 n))
 
+(define (fib-iter a b p q count)
+  (cond ((= count 0)
+         b)
+        ((even? count)
+         (fib-iter a
+                   b
+                   (+ (* p p) (* q q))   ; compute p’
+                   (+ (* 2 p q) (* q q)) ; compute q’
+                   (/ count 2)))
+        (else
+         (fib-iter (+ (* b q)
+                      (* a q)
+                      (* a p))
+                   (+ (* b p)
+                      (* a q))
+                   p
+                   q
+                   (- count 1)))))
+
+;; 1.20 page 115
