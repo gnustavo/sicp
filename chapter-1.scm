@@ -343,3 +343,78 @@
 
 ;; 1.25 page 125
 
+(define (fast-expt b n)
+  (cond ((= n 0)
+         1)
+        ((even? n)
+         (square (fast-expt b (/ n 2))))
+        (else
+         (* b (fast-expt b (- n 1))))))
+
+(define (expmod base exp m)
+  (remainder (fast-expt base exp) m))
+
+; Nope, because fast-expt would compute huge numbers while the original
+; expmod keeps numbers small by taking their modulo (remainder) at each
+; level.
+
+;; 1.26 not code
+
+;; 1.27 page 126
+
+; 561, 1105, 1729, 2465, 2821, and 6601
+
+(define (congruent? n)
+  (define (try n a)
+    (if (>= a n)
+        true
+        (and (= (expmod a n n) a)
+             (try n (+ a 1)))))
+  (try n 0))
+
+(congruent? 561)
+(congruent? 1105)
+(congruent? 1729)
+(congruent? 2465)
+(congruent? 2821)
+(congruent? 6601)
+
+; all true!
+
+;; 1.28
+
+(define (expmod-nontrivial base exp m)
+  (cond ((= exp 0) 1)
+        ((even? exp)
+         (let* ((sr (expmod-nontrivial base (/ exp 2) m))
+                (rem (remainder (square sr) m)))
+           (if (and (= rem 1) (not (= sr 1)) (not (= sr (- m 1))))
+               0
+               rem)))
+        (else
+         (remainder
+          (* base (expmod-nontrivial base (- exp 1) m))
+          m))))
+
+(define (miller-rabin-test n)
+  (define (try-it a)
+    (= (expmod-nontrivial a (- n 1) n) 1))
+  (try-it (+ 1 (random (- n 1)))))
+
+(define (fast-prime-mr? n times)
+  (cond ((= times 0) true)
+        ((miller-rabin-test n)
+         (fast-prime-mr? n (- times 1)))
+        (else false)))
+
+(map (lambda (n) (fast-prime-mr? n 10))
+     (list 2 3 4 5 6 7 8 9 10 11 12 13))
+
+(define (carmichael)
+  (list 561 1105 1729 2465 2821 6601))
+
+(map (lambda (n) (fast-prime? n 10)) (carmichael))
+(map (lambda (n) (fast-prime-mr? n 10)) (carmichael))
+
+;; 1.29 page 134
+
