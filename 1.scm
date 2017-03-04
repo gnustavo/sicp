@@ -489,7 +489,7 @@
 (define (product term a next b)
   (accumulate * 1 term a next b))
 
-;; 2 
+;; 2
 
 (define (accumulate combiner null-value term a next b)
   (define (iter a result)
@@ -524,7 +524,7 @@
 
 (define (fixed-point f first-guess)
   (define (close-enough? v1 v2)
-    (< (abs (- v1 v2)) 
+    (< (abs (- v1 v2))
        tolerance))
   (define (try guess)
 ;    (display guess)
@@ -547,7 +547,7 @@
 
 ; 1.37
 
-;; 1 
+;; 1
 
 (define (cont-frac n d k)
   (define (cont-frac-i i)
@@ -577,7 +577,7 @@
            d-euler
            100)
 
-; 1.39 
+; 1.39
 
 (define (tan-cf x k)
   (define (n i) (- 0 (* x x)))
@@ -588,28 +588,28 @@
 
 (tan-cf (* (/ (PI) 2) 0.9) 100)
 
-;;; 1.3.4 
+;;; 1.3.4
 
 (define (average x y)
   (/ (+ x y) 2))
 
 (define (average-damp f)
-  (lambda (x) 
+  (lambda (x)
     (average x (f x))))
-  
+ 
 (define (sqrt x)
-  (fixed-point 
-   (average-damp 
+  (fixed-point
+   (average-damp
     (lambda (y) (/ x y)))
    1.0))
 
 (define (cube-root x)
-  (fixed-point 
-   (average-damp 
-    (lambda (y) 
+  (fixed-point
+   (average-damp
+    (lambda (y)
       (/ x (square y))))
    1.0))
- 
+
 (define (deriv g)
   (lambda (x)
     (/ (- (g (+ x dx)) (g x))
@@ -619,68 +619,68 @@
 
 (define (newton-transform g)
   (lambda (x)
-    (- x (/ (g x) 
+    (- x (/ (g x)
             ((deriv g) x)))))
 
 (define (newtons-method g guess)
-  (fixed-point (newton-transform g) 
+  (fixed-point (newton-transform g)
                guess))
 
 (define (sqrt x)
-  (newtons-method 
-   (lambda (y) 
-     (- (square y) x)) 
+  (newtons-method
+   (lambda (y)
+     (- (square y) x))
    1.0))
 
-(define (fixed-point-of-transform 
+(define (fixed-point-of-transform
          g transform guess)
   (fixed-point (transform g) guess))
 
 (define (sqrt x)
-  (fixed-point-of-transform 
+  (fixed-point-of-transform
    (lambda (y) (/ x y))
    average-damp
    1.0))
 
 (define (sqrt x)
-  (fixed-point-of-transform 
+  (fixed-point-of-transform
    (lambda (y) (- (square y) x))
    newton-transform
    1.0))
 
-; 1.40 
+; 1.40
 
 (define (cubic a b c)
   (lambda (x) (+ c (* x (+ b (* x (+ a x)))))))
-               
+              
 
 (newtons-method (cubic 1 1 1) 1)
 
-; 1.41 
+; 1.41
 
 (define (double f)
   (lambda (x) (f (f x))))
 
 (((double (double double)) inc) 5)
 
-; 1.42 
+; 1.42
 
 (define (compose f g)
   (lambda (x) (f (g x))))
 
 ((compose square inc)   6)
 
-; 1.43 
+; 1.43
 
 (define (repeated f n)
   (cond
     ((zero? n) identity)
     ((even? n) (repeated (compose f f) (/ n 2)))
     (else (compose f (repeated f (- n 1))))))
-  
+ 
 ((repeated square 2) 5)
 
-; 1.44 
+; 1.44
 
 (define (smooth f)
   (let ((dx 0.001))
@@ -690,13 +690,13 @@
 
 ;((repeated smooth n) f)
 
-; 1.45 
+; 1.45
 
 (define (nth-power x n)
   (cond
     ((zero? n) 1)
     ((even? n) (let ((p (nth-power x (/ n 2)))) (* p p)))
-    (else      (* x (nth-power x (- n 1))))))  
+    (else      (* x (nth-power x (- n 1)))))) 
 
 (define (nth-root x n)
   (fixed-point ((repeated average-damp 3) (lambda (y) (/ x (nth-power y (- n 1)))))
@@ -704,7 +704,7 @@
 
 (nth-root 100 8)
 
-; 1.46 
+; 1.46
 
 (define (iterative-improvement good-enough? improve)
   (define (try guess)
@@ -719,13 +719,13 @@
      (lambda (guess) (< (abs (- (square guess) x)) 0.001))
      (lambda (guess) (average guess (/ x guess))))
     1.0))
-  
+ 
 (sqrt 4.0)
 
 
 ;(define (fixed-point f first-guess)
 ;  (define (close-enough? v1 v2)
-;    (< (abs (- v1 v2)) 
+;    (< (abs (- v1 v2))
 ;       tolerance))
 ;  (define (try guess)
 ;    (let ((next (f guess)))
