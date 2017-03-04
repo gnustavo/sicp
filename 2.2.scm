@@ -24,19 +24,19 @@
 
 ; (reverse (list 1 2 3 4))
 
-; 2.19 
+; 2.19
 
 (define (count-change amount)
   (cc amount 5))
 
 (define (cc amount kinds-of-coins)
   (cond ((= amount 0) 1)
-        ((or (< amount 0) 
-             (= kinds-of-coins 0)) 
+        ((or (< amount 0)
+             (= kinds-of-coins 0))
          0)
-        (else 
+        (else
          (+ (cc amount (- kinds-of-coins 1))
-            (cc (- amount (first-denomination 
+            (cc (- amount (first-denomination
                            kinds-of-coins))
                 kinds-of-coins)))))
 
@@ -49,19 +49,19 @@
 
 
 (define (cc amount coin-values)
-  (cond ((= amount 0) 
+  (cond ((= amount 0)
          1)
-        ((or (< amount 0) 
-             (no-more? coin-values)) 
+        ((or (< amount 0)
+             (no-more? coin-values))
          0)
         (else
-         (+ (cc 
+         (+ (cc
              amount
-             (except-first-denomination 
+             (except-first-denomination
               coin-values))
-            (cc 
+            (cc
              (- amount
-                (first-denomination 
+                (first-denomination
                  coin-values))
              coin-values)))))
 
@@ -74,10 +74,10 @@
 (define (no-more? coin-values)
   (null? coin-values))
 
-(define us-coins 
+(define us-coins
   (list 50 25 10 5 1))
 
-(define uk-coins 
+(define uk-coins
   (list 100 50 20 10 5 2 1 0.5))
 
 ;(cc 100 uk-coins)
@@ -111,7 +111,7 @@
       (begin (proc (car list))
             (for-each proc (cdr list)))))
 
-;(for-each 
+;(for-each
 ; (lambda (x) (newline) (display x))
 ; (list 57 321 88))
 
@@ -123,7 +123,7 @@
         reversed
         (deep-reverse-and-append
           (cdr list)
-          (cons 
+          (cons
             (if (pair? (car list))
                 (deep-reverse-and-append (car list) '())
                 (car list))
@@ -231,7 +231,7 @@
         ((not (pair? tree)) (proc tree))
         (else (cons (tree-map proc (car tree)) (tree-map proc (cdr tree))))))
 
-(define (square-tree tree) 
+(define (square-tree tree)
   (tree-map (lambda (x) (* x x)) tree))
 
 ;(square-tree t)
@@ -254,37 +254,37 @@
   (cond ((null? sequence) nil)
         ((predicate (car sequence))
          (cons (car sequence)
-               (filter predicate 
+               (filter predicate
                        (cdr sequence))))
-        (else  (filter predicate 
+        (else  (filter predicate
                        (cdr sequence)))))
 
 (define (accumulate op initial sequence)
   (if (null? sequence)
       initial
       (op (car sequence)
-          (accumulate op 
-                      initial 
+          (accumulate op
+                      initial
                       (cdr sequence)))))
 
 (define (enumerate-interval low high)
   (if (> low high)
       nil
-      (cons low 
-            (enumerate-interval 
-             (+ low 1) 
+      (cons low
+            (enumerate-interval
+             (+ low 1)
              high))))
 
 (define (enumerate-tree tree)
   (cond ((null? tree) nil)
         ((not (pair? tree)) (list tree))
-        (else (append 
+        (else (append
                (enumerate-tree (car tree))
                (enumerate-tree (cdr tree))))))
 
 
 (define (map p sequence)
-  (accumulate (lambda (x y) (cons (p x) y)) 
+  (accumulate (lambda (x y) (cons (p x) y))
               nil sequence))
 
 (define (append seq1 seq2)
@@ -295,9 +295,9 @@
 
 ; 2.34
 
-(define 
+(define
   (horner-eval x coefficient-sequence)
-  (accumulate 
+  (accumulate
    (lambda (this-coeff higher-terms)
      (+ this-coeff (* x higher-terms)))
    0
@@ -343,7 +343,7 @@
 
 (define (matrix-*-matrix m n)
   (let ((cols (transpose n)))
-    (map (lambda (mrow) 
+    (map (lambda (mrow)
            (map (lambda (nrow)
                   (dot-product mrow nrow))
                 cols))
@@ -375,11 +375,144 @@
 ; 2.39
 
 (define (reverse sequence)
-  (fold-right 
+  (fold-right
     (lambda (x y) (append y (list x))) nil sequence))
 
 (define (reverse sequence)
-  (fold-left 
+  (fold-left
    (lambda (x y) (cons y x)) nil sequence))
 
 ;(reverse (list 1 2 3 4 5))
+
+; 2.40
+
+(define (flatmap proc seq)
+  (accumulate append nil (map proc seq)))
+
+(define (permutations s)
+  (if (null? s)   ; empty set?
+      (list nil)  ; sequence containing empty set
+      (flatmap (lambda (x)
+                 (map (lambda (p)
+                        (cons x p))
+                      (permutations
+                       (remove x s))))
+               s)))
+
+(define (remove item sequence)
+  (filter (lambda (x) (not (= x item)))
+          sequence))
+
+(define (prime-sum? pair)
+  (prime? (+ (car pair) (cadr pair))))
+
+(define (make-pair-sum pair)
+  (list (car pair)
+        (cadr pair)
+        (+ (car pair) (cadr pair))))
+
+(define (prime-sum-pairs n)
+  (map make-pair-sum
+       (filter
+        prime-sum?
+        (flatmap
+         (lambda (i)
+           (map (lambda (j)
+                  (list i j))
+                (enumerate-interval
+                 1
+                 (- i 1))))
+         (enumerate-interval 1 n)))))
+
+
+(define (unique-pairs n)
+  (flatmap
+         (lambda (i)
+           (map (lambda (j)
+                  (list i j))
+                (enumerate-interval
+                 1
+                 (- i 1))))
+         (enumerate-interval 1 n)))
+
+;(unique-pairs 4)
+
+(define (prime-sum-pairs n)
+  (map make-pair-sum
+       (filter
+        prime-sum?
+        (unique-pairs n))))
+
+; 2.41
+
+(define (ordered-triples n s)
+  (define (sum-s? triple)
+    (= s (accumulate + 0 triple)))
+  (filter sum-s?
+    (flatmap
+      (lambda (i)
+        (flatmap (lambda (j)
+               (map (lambda (k)
+                      (list i j k))
+                    (enumerate-interval 1 (- j 1))))
+            (enumerate-interval 2 (- i 1))))
+      (enumerate-interval 3 n))))
+
+;(ordered-triples 10 20)
+
+; 2.42
+
+(define (queens board-size)
+  (define (queen-cols k)
+    (if (= k 0)
+        (list empty-board)
+        (filter
+          (lambda (positions)
+            (safe? k positions))
+          (flatmap
+           (lambda (rest-of-queens)
+             (map (lambda (new-row)
+                    (adjoin-position
+                     new-row
+                     k
+                     rest-of-queens))
+                  (enumerate-interval
+                    1
+                    board-size)))
+           (queen-cols (- k 1))))))
+  (queen-cols board-size))
+
+; I'll represent boards as lists of pairs of numbers, each pair corresponding to the coordinates of one queen
+
+(define empty-board (list))
+
+(define (adjoin-position row col positions)
+  (cons (cons row col) positions))
+
+(define (safe? col positions)
+  (define (zero-or-one predicate coords)
+    (< (length (filter predicate coords)) 2))
+  (let ((row (caar (filter (lambda (coord) (= col (cdr coord))) positions))))
+         (and (zero-or-one (lambda (coord) (= (car coord) row)) positions)
+            (zero-or-one (lambda (coord) (= (cdr coord) col)) positions))))
+
+;(queens 6)
+
+; 2.43
+
+(define (queens-slow board-size)
+  (define (queen-cols k)
+    (if (= k 0)
+        (list empty-board)
+        (filter
+          (lambda (positions)
+            (safe? k positions))
+          (flatmap
+            (lambda (new-row)
+              (map (lambda (rest-of-queens)
+                     (adjoin-position new-row k rest-of-queens))
+                   (queen-cols (- k 1))))
+            (enumerate-interval 1 board-size)))))
+  (queen-cols board-size))
+
+;(queens 6)
